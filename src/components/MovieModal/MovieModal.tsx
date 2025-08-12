@@ -10,6 +10,8 @@ interface MovieModalProps {
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
     useEffect(() => {
+        console.log('Opening modal for movie:', movie.title);
+        
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.code === 'Escape') {
                 onClose();
@@ -23,13 +25,24 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
             document.body.style.overflow = 'visible';
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [onClose]);
+    }, [onClose, movie.title]);
 
     const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
     };
+
+    if (!movie.backdrop_path) {
+        console.warn('No backdrop path for movie:', movie.title);
+        return null;
+    }
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) {
+        console.error('Modal root element not found!');
+        return null;
+    }
 
     return createPortal(
         <div className={styles.backdrop} onClick={handleBackdropClick} role="dialog" aria-modal="true">
@@ -41,6 +54,10 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
                     src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
                     alt={movie.title}
                     className={styles.image}
+                    onError={(e) => {
+                        console.error('Error loading image:', movie.backdrop_path);
+                        (e.target as HTMLImageElement).style.display = 'none';
+                    }}
                 />
                 <div className={styles.content}>
                     <h2>{movie.title}</h2>
@@ -54,6 +71,6 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
                 </div>
             </div>
         </div>,
-        document.getElementById('modal-root') as HTMLElement
+        modalRoot
     );
 }
