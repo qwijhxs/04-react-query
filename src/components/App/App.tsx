@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import ReactPaginate from 'react-paginate';
-import { fetchMovies } from '../../services/movieService';
+import { fetchMovies, type MoviesResponse } from '../../services/movieService';
 import type { Movie } from '../../types/movie';
 import SearchBar from '../SearchBar/SearchBar';
 import MovieGrid from '../MovieGrid/MovieGrid';
@@ -11,20 +11,13 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
 import styles from './App.module.css';
 
-
-export interface MovieApiResponse {
-    results: Movie[];
-    total_pages: number;
-
-}
-
 export default function App() {
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(1);
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { data, error, isError, isLoading, isFetching } = useQuery<MovieApiResponse>({
+    const { data, error, isError, isLoading, isFetching } = useQuery<MoviesResponse>({
         queryKey: ['movies', query, page],
         queryFn: () => fetchMovies(query, page),
         enabled: !!query,
@@ -57,7 +50,6 @@ export default function App() {
     };
 
     const handleSelectMovie = (movie: Movie) => {
-        console.log('Selected movie data:', movie);
         setSelectedMovie(movie);
     };
 
@@ -85,7 +77,6 @@ export default function App() {
                         onSelect={handleSelectMovie} 
                     />
                     
-                    {}
                     {data.total_pages > 1 && (
                         <div className={styles.paginationContainer}>
                             <ReactPaginate
@@ -116,4 +107,5 @@ export default function App() {
                 />
             )}
         </>
-    );}
+    );
+}
